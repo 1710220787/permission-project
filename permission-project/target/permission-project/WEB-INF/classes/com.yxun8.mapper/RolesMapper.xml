@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.yxun8.mapper.RolesMapper" >
+
+  <resultMap id="BaseResultMap" type="com.yxun8.domain.Roles" >
+    <id column="rid" property="rid" jdbcType="BIGINT" />
+    <result column="rnum" property="rnum" jdbcType="VARCHAR" />
+    <result column="rname" property="rname" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from roles
+    where rid = #{rid,jdbcType=BIGINT}
+  </delete>
+  
+  <insert id="saveRole" parameterType="com.yxun8.domain.Roles" useGeneratedKeys="true" keyColumn="rid" keyProperty="rid">
+    insert into roles (rid, rnum, rname
+      )
+    values (#{rid,jdbcType=BIGINT}, #{rnum,jdbcType=VARCHAR}, #{rname,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="saveRole_Permission">
+    insert into `role_permission` (rid,pid) values (#{rid},#{pid});
+  </insert>
+
+  <update id="updateByPrimaryKey" parameterType="com.yxun8.domain.Roles" >
+    update roles
+    set rnum = #{rnum,jdbcType=VARCHAR},
+      rname = #{rname,jdbcType=VARCHAR}
+    where rid = #{rid,jdbcType=BIGINT}
+  </update>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select rid, rnum, rname
+    from roles
+    where rid = #{rid,jdbcType=BIGINT}
+  </select>
+
+  <select id="selectAll" resultMap="BaseResultMap" >
+    select rid, rnum, rname
+    from `roles`
+  </select>
+
+
+  <!--打破角色与权限的关系-->
+  <delete id="deleteRoleAndPermission" parameterType="java.lang.Long">
+    delete from `role_permission`
+    where rid = #{rid,jdbcType=BIGINT}
+  </delete>
+  <!--删除角色-->
+  <delete id="deleteRole" parameterType="java.lang.Long">
+    delete from `roles`
+    where rid = #{rid,jdbcType=BIGINT}
+  </delete>
+
+  <!--更新角色-->
+  <update id="updateRole" parameterType="com.yxun8.domain.Roles">
+    update `roles`
+    set rname = #{rname,jdbcType=VARCHAR},
+      rnum = #{rnum,jdbcType=VARCHAR}
+    where rid = #{rid,jdbcType=BIGINT}
+  </update>
+
+</mapper>

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+    http://www.springframework.org/schema/aop
+    http://www.springframework.org/schema/aop/spring-aop.xsd
+     http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx.xsd
+">
+    <!--id必须是：shiroFilter-->
+    <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+        <!--配置认证登录路径-->
+        <property name="loginUrl" value="/login"/>
+        <!--注入管理器-->
+        <property name="securityManager" ref="securityManager"/>
+        <property name="filterChainDefinitions">
+            <value>
+                /common/** = anon   <!--不需要登录认证-->
+                /css/** = anon
+                /easyui/** = anon
+                /image/** = anon
+                /js/** = anon
+                /json/** = anon
+                /plugins/** = anon
+                /login.jsp = anon
+                /logout = logout  <!--退出-->
+                /** = authc   <!--必须登录认证-->
+            </value>
+        </property>
+
+        <!--配置过滤器-->
+        <property name="filters">
+            <map>
+                <entry key="authc" value-ref="filter"/>
+            </map>
+        </property>
+
+    </bean>
+
+
+    <!--配置shiro注解扫描-->
+    <!--配置为true即为使用cglib继承方式-->
+    <aop:config proxy-target-class="true"/>
+    <!--使用第三方去扫描shiro注解-->
+    <bean id="advisor" class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
+        <property name="securityManager" ref="securityManager"/>
+    </bean>
+
+
+
+    <!--过滤器-->
+    <bean id="filter" class="com.yxun8.filter.MyFilter"/>
+
+    <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+        <property name="realm" ref="realm"/>
+        <!--加入缓存-->
+        <property name="cacheManager" ref="ehCacheManager"/>
+    </bean>
+
+    <!--自定义realm-->
+    <bean id="realm" class="com.yxun8.realm.EmployeeRealm">
+        <!--加入凭证匹配器-->
+        <property name="credentialsMatcher" ref="credentialsMatcher"/>
+    </bean>
+
+    <!--缓存管理器-->
+    <bean id="ehCacheManager" class="org.apache.shiro.cache.ehcache.EhCacheManager">
+        <property name="cacheManagerConfigFile" value="classpath:ehcache.xml"/>
+    </bean>
+
+
+    <!--凭证匹配器-->
+    <bean id="credentialsMatcher" class="org.apache.shiro.authc.credential.HashedCredentialsMatcher">
+        <!--散列次数-->
+        <property name="hashIterations" value="1024"/>
+        <!--用什么加密-->
+        <property name="hashAlgorithmName" value="md5"/>
+    </bean>
+
+</beans>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yxun8.mapper.MenuMapper">
+
+  <resultMap id="BaseResultMap" type="com.yxun8.domain.Menu">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="text" jdbcType="VARCHAR" property="text" />
+    <result column="url" jdbcType="VARCHAR" property="url" />
+    <association property="parentId" javaType="com.yxun8.domain.Menu" columnPrefix="m_">
+      <id property="id" column="id"></id>
+      <result property="text" column="text"></result>
+      <result property="url" column="url"></result>
+    </association>
+
+      <!--对应的权限-->
+      <association property="permission" javaType="com.yxun8.domain.Permission">
+          <id property="pid" column="pid"></id>
+          <result property="pname" column="pname"></result>
+          <result property="presource" column="presource"></result>
+      </association>
+
+      <!--查询子菜单  分步查询 把查询出来的id传过去-->
+      <collection property="children" ofType="com.yxun8.domain.Menu" select="getChildMenu" column="id"></collection>
+  </resultMap>
+
+    <!--加载树菜单 用分步查询-->
+    <!--1.先查父菜单-->
+    <select id="getTreeData" resultMap="BaseResultMap">
+        SELECT * FROM menu as m
+        LEFT JOIN permission as p
+        ON m.permission_id = p.pid
+        WHERE parent_id is null
+    </select>
+
+    <!--2.分步查询：根据菜单id，查询子菜单-->
+    <select id="getChildMenu" resultMap="BaseResultMap">
+        SELECT * FROM menu as m
+        LEFT JOIN permission as p
+        ON m.permission_id = p.pid
+        WHERE parent_id = #{id}
+    </select>
+
+
+
+    <select id="selectAll" resultMap="BaseResultMap">
+    SELECT
+        m1.id,
+        m1.text,
+        m1.url,
+        m2.id as m_id,
+        m2.text as m_text,
+        m2.url as m_url
+    FROM
+        menu AS m1
+    LEFT JOIN menu AS m2 ON m1.parent_id = m2.id
+  </select>
+  <select id="parentList" resultType="com.yxun8.domain.Menu">
+      SELECT id,text FROM menu
+  </select>
+
+    <!--保存菜单-->
+    <insert id="saveMenu" parameterType="com.yxun8.domain.Menu">
+        INSERT INTO menu (text, url, parent_id)
+        VALUES
+            (#{text},#{url},#{parentId.id})
+    </insert>
+
+    <!--更新菜单-->
+    <update id="updateMenu" parameterType="com.yxun8.domain.Menu">
+        UPDATE `menu`
+        SET text = #{text},url = #{url},parent_id = #{parentId.id}
+        WHERE
+            id = #{id}
+    </update>
+
+    <!--删除菜单-->
+    <delete id="deleteMenu" parameterType="java.lang.Long">
+        delete from menu where id = #{id}
+    </delete>
+
+
+</mapper>

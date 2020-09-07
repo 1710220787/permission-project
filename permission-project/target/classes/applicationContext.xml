@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+    http://www.springframework.org/schema/aop
+    http://www.springframework.org/schema/aop/spring-aop.xsd
+     http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx.xsd
+">
+    <!--开启包扫描-->
+    <context:component-scan base-package="com.yxun8"/>
+
+    <!--引入springmvc-->
+    <import resource="classpath:applicationContext-SpringMVC.xml"/>
+
+    <!--引入mybaits-->
+    <import resource="classpath:applicationContext-Mybatis.xml"/>
+
+    <!--引入Shiro-->
+    <import resource="classpath:applicationContext-Shiro.xml"/>
+
+    <!--日志-->
+    <bean id="systemAspect" class="com.yxun8.aspect.SystemAspect"/>
+    <!--保存日志-->
+    <aop:config>
+        <aop:pointcut id="servicePointcut" expression="execution(* com.yxun8.service.*.*(..))"/>
+        <aop:aspect ref="systemAspect">
+            <aop:after method="log" pointcut-ref="servicePointcut"/>
+        </aop:aspect>
+    </aop:config>
+
+</beans>
